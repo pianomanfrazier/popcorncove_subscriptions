@@ -52,6 +52,11 @@ export default {
           icon: 'shopping-cart'
         },
         {
+          title: 'Order Checkout',
+          link: '/order2',
+          icon: 'shopping-cart'
+        },
+        {
           title: 'Search Database',
           link: '/search',
           icon: 'search'

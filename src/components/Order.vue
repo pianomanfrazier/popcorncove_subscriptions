@@ -163,7 +163,7 @@
 let states = require('../assets/states_titlecase.json')
 
 export default {
-  name: '',
+  name: 'Order',
   data () {
     return {
       valid: false,

@@ -209,14 +209,18 @@ export default {
   methods: {
     submit () {
       if (this.$refs.form.validate()) {
-        // Native form submission is not yet supported
-        // axios.post('/api/submit', {
-        //   name: this.name,
-        //   email: this.email,
-        //   select: this.select,
-        //   checkbox: this.checkbox
-        // })
-        console.log('form submit')
+        axios.post('/api/submit', {
+          firstname: this.firstname,
+          lastname: this.lastname,
+          address: this.address,
+          city: this.city,
+          state: this.state,
+          zip: this.zip,
+          email: this.email,
+          select: this.select,
+          startdate: this.startdate,
+          enddate: this.enddate
+        })
       }
     },
     clear () {

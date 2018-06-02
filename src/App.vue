@@ -16,6 +16,13 @@
       <v-list>
         <navitem v-for="item in nav" :item="item" :key="item.title"></navitem>
       </v-list>
+      <v-tooltip bottom>
+        <v-btn slot="activator" style="margin-left: auto; margin-right: auto; display: block;">
+          <v-icon>fas fa-download</v-icon>
+          &nbsp; Export Monthly Report
+        </v-btn>
+        <span>Download this month's subscription report.</span>
+      </v-tooltip>
     </v-navigation-drawer>
 
     <v-content>

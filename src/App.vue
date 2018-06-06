@@ -25,12 +25,12 @@
           </v-list-tile-content>
         </v-list-tile>
       </v-list>
-      <v-tooltip bottom>
+      <v-tooltip bottom max-width="250px">
         <v-btn slot="activator" style="margin-left: auto; margin-right: auto; display: block;">
           <v-icon>fas fa-download</v-icon>
           &nbsp; Export Monthly Report
         </v-btn>
-        <span>Download this month's subscription report.</span>
+        <span>Download this month's subscription report for all customers in the database.</span>
       </v-tooltip>
     </v-navigation-drawer>
 

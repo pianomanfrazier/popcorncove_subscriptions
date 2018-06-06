@@ -107,6 +107,7 @@
                     v-model="phone"
                     :rules="phoneRules"
                     label="Phone Number"
+                    mask="phone"
                     required
                     :disabled="disableForm"
                   ></v-text-field>
@@ -182,7 +183,7 @@
         <v-card v-if="customer">
           <v-card-title primary-title>
             <h1 class="headline mb-0">
-            Subscription Selection for {{ customer.fullname }}
+            Subscription Selection for <em>{{ customer.name.first }} {{ customer.name.last }}</em>
             </h1>
           </v-card-title>
         <v-form ref="subform" v-model="subvalid">
@@ -213,7 +214,7 @@
           >
             <v-text-field
               slot="activator"
-              v-model="startdate"
+              v-model="startdateFormatted"
               label="Choose Start Month"
               prepend-icon="event"
               :rules="[v => !!v || 'Item is required']"
@@ -248,7 +249,7 @@
           >
             <v-text-field
               slot="activator"
-              v-model="enddate"
+              v-model="enddateFormatted"
               label="Choose Ending Month"
               prepend-icon="event"
               :rules="[v => !!v || 'Item is required']"
@@ -289,7 +290,7 @@
         <p v-if="customer">
         <b>Customer:</b> {{ customer.name.first }} {{ customer.name.last }} <br>
         <b>Item:</b> {{ select }} <br>
-        <b>Subscription Dates:</b> {{ startdate }} to {{ enddate }}
+        <b>Subscription Dates:</b> {{ startdate | formatDate }} to {{ enddate | formatDate }}
         </p>
       </v-card-text>
       <v-card-actions>
@@ -305,8 +306,13 @@
 let states = require('../assets/states_titlecase.json')
 let customers = require('../assets/customers.json')
 
+import isFuture from 'date-fns/is_future'
+import isAfter from 'date-fns/is_after'
+import isBefore from 'date-fns/is_before'
+import format from 'date-fns/format'
+
 export default {
-  name: 'order2',
+  name: 'order',
   data () {
     return {
       orderDialog: false,
@@ -462,35 +468,20 @@ export default {
     },
     allowedStartDates (val) {
       // return false for any date before today
-      let date = new Date()
-      let year = date.getFullYear()
-      let month = date.getMonth()
-      let valyear = parseInt(val.split('-')[0], 10)
-      let valmonth = parseInt(val.split('-')[1], 10)
-      if (valyear < year) {
-        return false
-      } else if (valyear > year) {
-        return true
-      } else {
-        return month < valmonth
-      }
+      return isFuture(val)
     },
     allowedEndDates (val) {
       // return false for any date before startdate
-      let startMonth = parseInt(this.startdate.split('-')[1], 10)
-      let startYear = parseInt(this.startdate.split('-')[0], 10)
-      let valyear = parseInt(val.split('-')[0], 10)
-      let valmonth = parseInt(val.split('-')[1], 10)
-      if (valyear < startYear) {
-        return false
-      } else if (valyear > startYear) {
-        return true
-      } else {
-        return startMonth < valmonth
-      }
+      return !isBefore(val, this.startdate) && isFuture(val)
     }
   },
   computed: {
+    startdateFormatted () {
+      return format(this.startdate, 'MMMM YYYY')
+    },
+    enddateFormatted () {
+      return format(this.enddate, 'MMMM YYYY')
+    }
   },
   watch: {
     customer (val) {
@@ -511,11 +502,8 @@ export default {
       }
     },
     startdate () {
-      let startMonth = parseInt(this.startdate.split('-')[1], 10)
-      let startYear = parseInt(this.startdate.split('-')[0], 10)
-      let endMonth = parseInt(this.enddate.split('-')[1], 10)
-      let endYear = parseInt(this.enddate.split('-')[0], 10)
-      if (startMonth > endMonth && startYear === endYear || startYear > endYear) {
+      // if the startdate is set past the enddate reset it
+      if (isAfter(this.startdate, this.enddate)) {
         this.enddate = ''
       }
     }

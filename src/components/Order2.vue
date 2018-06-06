@@ -274,13 +274,30 @@
       <v-card-actions>
         <v-btn @click.native="stepper = 1">Previous</v-btn>
         <v-btn @click.native="stepper = 1; clear()">Cancel</v-btn>
-        <v-btn :disabled="!subvalid" @click.native="placeOrder">Place Order</v-btn>
+        <v-btn :disabled="!subvalid" color="primary" @click.native="placeOrder">Place Order</v-btn>
       </v-card-actions>
 
       </v-card>
       </v-stepper-content>
     </v-stepper-items>
   </v-stepper>
+
+  <v-dialog v-model="orderDialog" width="300px">
+    <v-card tile>
+      <v-card-text>
+        You are about to place the following order:
+        <p v-if="customer">
+        <b>Customer:</b> {{ customer.name.first }} {{ customer.name.last }} <br>
+        <b>Item:</b> {{ select }} <br>
+        <b>Subscription Dates:</b> {{ startdate }} to {{ enddate }}
+        </p>
+      </v-card-text>
+      <v-card-actions>
+        <v-btn @click="orderDialog = false; placeOrder" color="primary">Confirm</v-btn>
+        <v-btn @click="orderDialog = false">Cancel</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </div>
 </template>
 
@@ -292,6 +309,7 @@ export default {
   name: 'order2',
   data () {
     return {
+      orderDialog: false,
       stepper: 0,
       byField: 'email',
       byFields: [
@@ -440,8 +458,7 @@ export default {
       }
     },
     placeOrder () {
-      console.log('placed order')
-      this.stepper = 1
+      this.orderDialog = true
     },
     allowedStartDates (val) {
       // return false for any date before today
@@ -491,6 +508,15 @@ export default {
       } else {
         this.clear()
         this.disableForm = false
+      }
+    },
+    startdate () {
+      let startMonth = parseInt(this.startdate.split('-')[1], 10)
+      let startYear = parseInt(this.startdate.split('-')[0], 10)
+      let endMonth = parseInt(this.enddate.split('-')[1], 10)
+      let endYear = parseInt(this.enddate.split('-')[0], 10)
+      if (startMonth > endMonth && startYear === endYear || startYear > endYear) {
+        this.enddate = ''
       }
     }
   }

@@ -2,7 +2,7 @@
   <div id="app">
     <v-app>
     <!-- side bar menu -->
-    <v-navigation-drawer app value="true" stateless permanent absolute>
+    <v-navigation-drawer app fixed value="true" stateless permanent>
       <v-toolbar flat>
       <v-list>
         <v-list-tile>
@@ -14,7 +14,16 @@
     </v-toolbar>
     <v-divider></v-divider>
       <v-list>
-        <navitem v-for="item in nav" :item="item" :key="item.title"></navitem>
+        <v-list-tile class="menu-tile">
+          <v-list-tile-action>
+            <v-icon>fas fa-shopping-cart</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>
+              Place or Edit a Subscription
+            </v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
       </v-list>
       <v-tooltip bottom>
         <v-btn slot="activator" style="margin-left: auto; margin-right: auto; display: block;">
@@ -36,34 +45,8 @@
 </template>
 
 <script>
-import navitem from './components/subcomponents/navitem'
-
 export default {
-  name: 'App',
-  components: {
-    navitem
-  },
-  data () {
-    return {
-      nav: [
-        {
-          title: 'Place New Order',
-          link: '/order',
-          icon: 'shopping-cart'
-        },
-        {
-          title: 'Order Checkout',
-          link: '/order2',
-          icon: 'shopping-cart'
-        },
-        {
-          title: 'Search Database',
-          link: '/search',
-          icon: 'search'
-        }
-      ]
-    }
-  }
+  name: 'App'
 }
 </script>
 

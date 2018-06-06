@@ -153,6 +153,15 @@
                     :disabled="disableForm"
                   ></v-text-field>
                 </v-flex>
+                <v-flex xs12>
+                  <v-text-field
+                    v-model="notes"
+                    label="Notes"
+                    textarea
+                    :disabled="disableForm"
+                  >
+                  </v-text-field>
+                </v-flex>
                 <v-flex>
                   <v-btn :disabled="!valid" v-if="!customer" style="float: left;" color="primary">Create Customer</v-btn>
                   <v-btn :disabled="!valid" v-if="customer && !disableForm" @click="updateCustomer(); disableForm = !disableForm;" style="float: left;">Update Customer</v-btn>
@@ -404,6 +413,7 @@ export default {
           .toLowerCase()
           .indexOf(query.toString().toLowerCase()) > -1
       },
+      notes: '',
       select: null,
       items: [
         'Popcorn',
@@ -428,14 +438,18 @@ export default {
     submit () {
       if (this.$refs.form.validate()) {
         this.$http.post('/api/submit', {
-          firstname: this.firstname,
-          lastname: this.lastname,
-          address: this.address,
-          city: this.city,
-          state: this.state,
-          zip: this.zip,
-          email: this.email,
-          phone: this.phone,
+          //****************************/
+          // customerId: this.customerId
+          //****************************/
+          // firstname: this.firstname,
+          // lastname: this.lastname,
+          // address: this.address,
+          // city: this.city,
+          // state: this.state,
+          // zip: this.zip,
+          // notes: this.notes,
+          // email: this.email,
+          // phone: this.phone,
           select: this.select,
           startdate: this.startdate,
           enddate: this.enddate
@@ -444,6 +458,9 @@ export default {
     },
     clear () {
       this.$refs.form.reset()
+      this.$refs.subform.reset()
+      this.startdate = ''
+      this.enddate = ''
       this.byField = 'email'
     },
     updateCustomer () {
@@ -455,11 +472,12 @@ export default {
           city: this.city,
           state: this.state,
           zip: this.zip,
+          notes: this.notes,
           email: this.email,
-          phone: this.phone,
-          select: this.select,
-          startdate: this.startdate,
-          enddate: this.enddate
+          phone: this.phone
+          // select: this.select,
+          // startdate: this.startdate,
+          // enddate: this.enddate
         })
       }
     },
@@ -477,10 +495,16 @@ export default {
   },
   computed: {
     startdateFormatted () {
-      return format(this.startdate, 'MMMM YYYY')
+      if (this.startdate) {
+        return format(this.startdate, 'MMMM YYYY')
+      }
+      return ''
     },
     enddateFormatted () {
-      return format(this.enddate, 'MMMM YYYY')
+      if (this.enddate) {
+        return format(this.enddate, 'MMMM YYYY')
+      }
+      return ''
     }
   },
   watch: {
@@ -494,6 +518,7 @@ export default {
         this.zip         = val.zip
         this.email       = val.email
         this.phone       = val.phone
+        this.notes       = val.notes
 
         this.disableForm = true
       } else {

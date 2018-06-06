@@ -445,15 +445,32 @@ export default {
     },
     allowedStartDates (val) {
       // return false for any date before today
-      let year = 2018
-      let month = 6
+      let date = new Date()
+      let year = date.getFullYear()
+      let month = date.getMonth()
       let valyear = parseInt(val.split('-')[0], 10)
       let valmonth = parseInt(val.split('-')[1], 10)
-      return month < valmonth
+      if (valyear < year) {
+        return false
+      } else if (valyear > year) {
+        return true
+      } else {
+        return month < valmonth
+      }
     },
     allowedEndDates (val) {
       // return false for any date before startdate
-      return parseInt(val.split('-')[1], 10) > parseInt(this.startdate.split('-')[1], 10)
+      let startMonth = parseInt(this.startdate.split('-')[1], 10)
+      let startYear = parseInt(this.startdate.split('-')[0], 10)
+      let valyear = parseInt(val.split('-')[0], 10)
+      let valmonth = parseInt(val.split('-')[1], 10)
+      if (valyear < startYear) {
+        return false
+      } else if (valyear > startYear) {
+        return true
+      } else {
+        return startMonth < valmonth
+      }
     }
   },
   computed: {

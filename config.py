@@ -5,4 +5,5 @@ class Config(object):
   SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
     'sqlite:///' + os.path.join(basedir, 'app.db')
   SQLALCHEMY_TRACK_MODIFICATIONS = False
-  ACCEPT_URLS = ['localhost:5000']
+  ADMIN_USER = os.environ.get('ADMIN_USER')
+  ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD')

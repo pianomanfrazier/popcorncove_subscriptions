@@ -17,7 +17,7 @@ class Subscription(db.Model):
   id                = db.Column(db.Integer, primary_key=True)
   customerID        = db.Column(db.Integer, db.ForeignKey('customer.id')) 
   itemID            = db.Column(db.Integer, db.ForeignKey('item.id')) 
-  shippingAddressID = db.Column(db.Interger, db.ForeignKey('shippingaddress.id'))
+  shippingAddressID = db.Column(db.Integer, db.ForeignKey('shippingaddress.id'))
   startDate         = db.Column(db.Date)
   stopDate          = db.Column(db.Date)
   note              = db.Column(db.String(255))

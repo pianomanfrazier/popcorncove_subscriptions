@@ -12,6 +12,9 @@ class Customer(db.Model):
   email         = db.Column(db.String(255), unique=True, index=True)
   time_created  = db.Column(db.DateTime(timezone=True), server_default=func.now(), index=True) 
 
+  def __repr__(self):
+    return '<Customer {}>'.format(self.name)
+
 class Subscription(db.Model):
   __tablename__     = 'subscription'
   id                = db.Column(db.Integer, primary_key=True)
@@ -22,10 +25,17 @@ class Subscription(db.Model):
   stopDate          = db.Column(db.Date)
   note              = db.Column(db.String(255))
 
+  def __repr__(self):
+    return '<Subscription {}>'.format(self.id)
+
+
 class Item(db.Model):
   __tablename = 'item'
   id          = db.Column(db.Integer, primary_key=True)
   name        = db.Column(db.String(25))
+
+  def __repr__(self):
+    return '<Item {}>'.format(self.name)
 
 class ShippingAddress(db.Model):
   __tablename__ = 'shippingaddress'
@@ -35,3 +45,6 @@ class ShippingAddress(db.Model):
   city          = db.Column(db.String(40))
   state         = db.Column(db.String(40))
   zip           = db.Column(db.String(11))
+
+  def __repr__(self):
+    return '<ShippingAddress {}>'.format(self.address)

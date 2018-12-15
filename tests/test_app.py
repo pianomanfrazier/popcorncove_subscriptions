@@ -7,6 +7,9 @@ import pytest
 from app import app
 
 class FlaskTestClientProxy(object):
+  """
+  see https://stackoverflow.com/questions/15278285/setting-mocking-request-headers-for-flask-app-unit-test
+  """
   def __init__(self, app):
     self.app = app
 

@@ -13,3 +13,6 @@ migrate = Migrate(app, db)
 
 from .authentication import requires_auth
 from app import routes, models
+from .api import api
+
+app.register_blueprint(api, url_prefix="/api/v1")

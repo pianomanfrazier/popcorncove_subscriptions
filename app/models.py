@@ -15,6 +15,23 @@ class Customer(db.Model):
   def __repr__(self):
     return '<Customer {}>'.format(self.name)
 
+  def to_dict(self):
+    return {
+      'id': self.id,
+      'name': self.name,
+      'phone': self.phone,
+      'email': self.email,
+      'time_created': self.time_created
+    }
+  
+  def from_dict(self, data):
+    try:
+      self.name = data['name']
+      self.phone = data['phone']
+      self.email = data['email']
+    except KeyError:
+      abort(400)
+
 class Subscription(db.Model):
   __tablename__     = 'subscription'
   id                = db.Column(db.Integer, primary_key=True)

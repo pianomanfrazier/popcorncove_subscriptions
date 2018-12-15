@@ -42,6 +42,8 @@ def test_api(client):
   rv = client.get('/api/v1/')
   assert b'Popcorn Cove Subscriptions version 1' in rv.data
 
+# Customer Tests
+
 def test_create_customer(client):
   rv = client.post('/api/v1/customer', json=dict(
     name='Bob Jones',
@@ -81,3 +83,11 @@ def test_delete_customer(client):
   ))
   rv = client.delete('/api/v1/customer/1')
   assert rv.status == '200 OK'
+
+# Subscription Tests
+
+
+# ShippingAddress Tests
+
+
+# Item Tests

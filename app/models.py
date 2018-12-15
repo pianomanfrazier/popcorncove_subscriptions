@@ -45,6 +45,28 @@ class Subscription(db.Model):
   def __repr__(self):
     return '<Subscription {}>'.format(self.id)
 
+  def to_dict(self):
+    return {
+      'id'                : self.id,
+      'customerID'        : self.customerID, 
+      'itemID'            : self.itemId,
+      'shippingAddressID' : self.shippingAddressID,
+      'startDate'         : self.startDate,
+      'stopDate'          : self.stopDate,
+      'note'              : self.note
+    }
+  
+  def from_dict(self, data):
+    try:
+      self.customerID        = data['customerID'] 
+      self.itemID            = data['itemID'] 
+      self.shippingAddressID = data['shippingAddressID'] 
+      self.startDate         = data['startDate'] 
+      self.stopDate          = data['stopDate'] 
+      self.note              = data['note'] 
+    except KeyError:
+      abort(400)
+
 
 class Item(db.Model):
   __tablename = 'item'
@@ -53,6 +75,18 @@ class Item(db.Model):
 
   def __repr__(self):
     return '<Item {}>'.format(self.name)
+
+  def to_dict(self):
+    return {
+      'id': self.id,
+      'name': self.name,
+    }
+  
+  def from_dict(self, data):
+    try:
+      self.name = data['name']
+    except KeyError:
+      abort(400)
 
 class ShippingAddress(db.Model):
   __tablename__ = 'shippingaddress'
@@ -65,3 +99,23 @@ class ShippingAddress(db.Model):
 
   def __repr__(self):
     return '<ShippingAddress {}>'.format(self.address)
+
+  def to_dict(self):
+    return {
+      'customerID'   : self.customerID, 
+      'address'      : self.address, 
+      'city'         : self.city, 
+      'state'        : self.state, 
+      'zip'          : self.zip
+    }
+  
+  def from_dict(self, data):
+    try:
+      self.id            = data['id'] 
+      self.customerID    = data['customerID'] 
+      self.address       = data['address'] 
+      self.city          = data['city'] 
+      self.state         = data['state'] 
+      self.zip           = data['zip'] 
+    except KeyError:
+      abort(400)

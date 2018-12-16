@@ -7,9 +7,9 @@ from sqlalchemy.sql import func
 class Customer(db.Model):
   __tablename__ = 'customer'
   id            = db.Column(db.Integer, primary_key=True)
-  name          = db.Column(db.String(70), unique=True, index=True)
-  phone         = db.Column(db.String(25), unique=True, index=True)
-  email         = db.Column(db.String(255), unique=True, index=True)
+  name          = db.Column(db.String(70), index=True)
+  phone         = db.Column(db.String(25), index=True)
+  email         = db.Column(db.String(255), index=True)
   time_created  = db.Column(db.DateTime(timezone=True), server_default=func.now(), index=True) 
 
   def __repr__(self):

@@ -4,6 +4,6 @@ This app tracks customers' subscriptions boxes. The users can input new customer
 
 # TODO
 
-- set ADMIN_USER and ADMIN_PASSWORD env variables for Heroku
-- set up database
-- create REST endpoints for CRUD
+- tie in front end with all endpoints
+- separate out separate step for shipping location (step 3)
+- allow admin to delete customer

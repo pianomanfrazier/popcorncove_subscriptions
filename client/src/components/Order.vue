@@ -163,7 +163,7 @@
                   </v-text-field>
                 </v-flex>
                 <v-flex>
-                  <v-btn :disabled="!valid" v-if="!customer" style="float: left;" color="primary">Create Customer</v-btn>
+                  <v-btn :disabled="!valid" v-if="!customer" @click="createCustomer();" style="float: left;" color="primary">Create Customer</v-btn>
                   <v-btn :disabled="!valid" v-if="customer && !disableForm" @click="updateCustomer(); disableForm = !disableForm;" style="float: left;">Update Customer</v-btn>
                   <v-btn v-if="customer && disableForm" @click="disableForm = !disableForm" style="float: left;">Edit Customer</v-btn>
                 </v-flex>
@@ -346,7 +346,7 @@ export default {
         }
       ],
       customer: undefined,
-      customers: customers,
+      customers: [],
       customeraddressfilter (item, queryText, itemText) {
         const hasValue = val => val != null ? val : ''
         const text = hasValue(item.address)
@@ -430,9 +430,13 @@ export default {
     }
   },
   mounted () {
-    customers.forEach( el => (
-      el.fullname = `${el.name.last}, ${el.name.first}`
-    ))
+    // customers.forEach( el => (
+    //   el.fullname = `${el.name.last}, ${el.name.first}`
+    // ))
+    $http.get('/api/v1/customer')
+      .then(res => {
+        this.customers = res.data
+      })
   },
   methods: {
     submit () {
@@ -462,6 +466,15 @@ export default {
       this.startdate = ''
       this.enddate = ''
       this.byField = 'email'
+    },
+    createCustomer () {
+      if (this.$refs.form.validate()) {
+        this.$http.post('/api/v1/customer', {
+          name: this.firstname + ' ' + this.lastname,
+          email: this.email,
+          phone: this.phone
+        })
+      }
     },
     updateCustomer () {
       if (this.$refs.form.validate()) {

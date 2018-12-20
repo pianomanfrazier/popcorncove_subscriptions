@@ -7,9 +7,14 @@ import App from './App'
 import router from './router'
 import axios from 'axios'
 import format from 'date-fns/format'
+import Toasted from 'vue-toasted'
 
 Vue.config.productionTip = false
 Vue.use(Vuetify)
+Vue.use(Toasted, {
+  duration: 3000,
+  iconPack: 'fontawesome'
+})
 Vue.prototype.$http = axios
 
 Vue.filter('formatDate', function (dt) {

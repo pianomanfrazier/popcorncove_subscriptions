@@ -20,7 +20,21 @@
           </v-list-tile-action>
           <v-list-tile-content>
             <v-list-tile-title>
+              <router-link to="/">
               Place or Edit a Subscription
+              </router-link>
+            </v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+        <v-list-tile class="menu-tile">
+          <v-list-tile-action>
+            <v-icon>fas fa-plus-circle</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>
+              <router-link to="/items">
+                Add Subscription Item
+              </router-link>
             </v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>

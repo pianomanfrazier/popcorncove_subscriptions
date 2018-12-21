@@ -17,17 +17,25 @@
     <v-stepper-items>
       <v-stepper-content step="1">
         <Customer
+          :customer="customer"
+          :customers="customers"
           @update:customer="customer = $event"
+          @update:customers="customers = $event"
           @next="stepper=2"
         />
       </v-stepper-content>
       <v-stepper-content step="2">
         <Shipping
           :customer="customer"
-          @update:address="shippingAddress = $event"
+          :customers="customers"
+          :address="address"
+          :addresses="addresses"
+          @update:customer="customer = $event"
+          @update:customers="customers = $event"
+          @update:address="address = $event"
+          @update:addresses="addresses = $event"
           @next="stepper = 3"
           @previous="stepper = 1"
-          @cancel="stepper = 1"
         />
       </v-stepper-content>
       <v-stepper-content step="3">
@@ -35,7 +43,7 @@
           :customer="customer"
           @update:subscription="subscription = $event"
           @previous="stepper = 2"
-          @cancel="stepper = 1"
+          @cancel="stepper = 1; customer = {};"
         />
       </v-stepper-content>
     </v-stepper-items>
@@ -75,8 +83,11 @@ export default {
   data () {
     return {
       customer: {},
+      customers: [],
+      address: '',
+      addresses: [],
       subscription: {},
-      shippingAddress: {},
+      subscriptions: [],
       orderDialog: false,
       stepper: 1,
     }

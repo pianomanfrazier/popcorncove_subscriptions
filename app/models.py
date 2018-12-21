@@ -6,12 +6,13 @@ from . import app
 from sqlalchemy.sql import func
 
 class Customer(db.Model):
-  __tablename__ = 'customer'
-  id            = db.Column(db.Integer, primary_key=True)
-  name          = db.Column(db.String(70), index=True)
-  phone         = db.Column(db.String(25), index=True)
-  email         = db.Column(db.String(255), index=True)
-  time_created  = db.Column(db.DateTime(timezone=True), server_default=func.now()) 
+  __tablename__            = 'customer'
+  id                       = db.Column(db.Integer, primary_key=True)
+  name                     = db.Column(db.String(70), index=True, nullable=False)
+  phone                    = db.Column(db.String(25), index=True, nullable=False)
+  email                    = db.Column(db.String(255), index=True, nullable=False)
+  preferredShippingAddress = db.Column(db.Integer, db.ForeignKey('shippingaddress.id'))
+  time_created             = db.Column(db.DateTime(timezone=True), server_default=func.now()) 
 
   def __repr__(self):
     return '<Customer {}>'.format(self.name)
@@ -22,14 +23,19 @@ class Customer(db.Model):
       'name': self.name,
       'phone': self.phone,
       'email': self.email,
+      'preferredShippingAddress': self.preferredShippingAddress,
       'time_created': self.time_created
     }
   
   def from_dict(self, data):
+    preferredShippingAddress = None
+    if 'preferredShippingAddress' in data.keys():
+      preferredShippingAddress = data['preferredShippingAddress']
     try:
-      self.name = data['name']
-      self.phone = data['phone']
-      self.email = data['email']
+      self.name                     = data['name']
+      self.phone                    = data['phone']
+      self.email                    = data['email']
+      self.preferredShippingAddress = preferredShippingAddress
     except KeyError:
       abort(400)
 

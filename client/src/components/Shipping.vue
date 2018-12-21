@@ -67,6 +67,10 @@
               :disabled="disableForm"
             ></v-text-field>
           </v-flex>
+          <v-flex xs4>
+            <span v-if="!!address && customer.preferredShippingAddress === address.id">Preferred Address</span>
+            <v-btn v-else :disabled="!(address && address.id)" @click="setPreferredAddress()">Set as Preferred Address</v-btn>
+          </v-flex>
           <v-flex>
             <v-btn :disabled="!valid" v-if="!address" @click="createAddress();" style="float: left;" color="primary">Create Address</v-btn>
             <v-btn :disabled="!valid" v-if="address && !disableForm" @click="updateAddress(); disableForm = !disableForm;" style="float: left;">Update Address</v-btn>
@@ -79,7 +83,6 @@
     <v-card-actions>
       <v-btn @click.native="$emit('previous')">Previous</v-btn>
       <v-btn :disabled="!address" @click.native="$emit('next')">Next</v-btn>
-      <v-btn @click.native="$emit('cancel')" class="warning">Cancel</v-btn>
     </v-card-actions>
 
   </v-card>
@@ -90,11 +93,9 @@ let states = require('../assets/states_titlecase.json')
 
 export default {
   name: 'shipping',
-  props: ['customer'],
+  props: ['customer', 'customers', 'address', 'addresses'],
   data () {
     return {
-      addresses: [],
-      address: null,
       street: '',
       city: '',
       state: '',
@@ -121,23 +122,33 @@ export default {
           .indexOf(query.toString().toLowerCase()) > -1
       },
       valid: false,
-      disableForm: false
+      disableForm: true
     }
   },
   mounted () {
   },
   methods: {
     getAllAddresses () {
-      this.$http
-        .get(`/api/v1/shippingaddress/${this.customer.id}`)
-        .then(res => {
-          this.$toasted.show('Addresses fetched')
-          this.addresses = res.data
-        })
-        .catch(err => {
-          this.$toasted.error('Failed to fetch addresses')
-          console.log(err)
-        })
+      if (this.customer && this.customer.id) {
+        this.$http
+          .get(`/api/v1/shippingaddress/${this.customer.id}`)
+          .then(res => {
+            // this.$toasted.show('Addresses fetched')
+            this.$emit('update:addresses', res.data)
+            let address = ''
+            if (this.customer.preferredShippingAddress) {
+              address = this.addresses.filter(el => el.id === this.customer.preferredShippingAddress)[0]
+            } else if (this.addresses.length > 0) {
+              address = this.addresses[0]
+            }
+            this.$emit('update:address', address)
+            this.address = address
+          })
+          .catch(err => {
+            // this.$toasted.error('Failed to fetch addresses')
+            console.log(err)
+          })
+      }
     },
     createAddress () {
       if (this.$refs.form.validate()) {
@@ -151,7 +162,9 @@ export default {
           })
           .then(res => {
             this.$toasted.show('Address created')
+            this.$emit('update:address', res.data)
             this.address = res.data
+            this.getAllAddresses()
           })
           .catch(err => {
             this.$toasted.err('Failed to create address')
@@ -160,17 +173,76 @@ export default {
       }
     },
     updateAddress () {
-
-    }
-  },
-  computed: {
-
+      if (this.$refs.form.validate()) {
+        this.$http
+          .put(`/api/v1/shippingaddress/${this.address.id}`, {
+            customerID  : this.customer.id,
+            address     : this.street,
+            city        : this.city,
+            state       : this.state,
+            zip         : this.zip
+          })
+          .then(res => {
+            this.$toasted.show('Address updated')
+            this.$emit('update:address', res.data)
+            this.address = res.data
+            this.getAllAddresses()
+          })
+          .catch(err => {
+            this.$toasted.err('Failed to update address')
+            console.log(err)
+          })
+      }
+    },
+    setPreferredAddress () {
+      this.$http
+        .put(`/api/v1/customer/${this.customer.id}`, {
+          name: this.customer.name,
+          phone: this.customer.phone,
+          email: this.customer.email,
+          preferredShippingAddress: this.address.id
+        })
+        .then(res => {
+          this.$toasted.show('Preferred address set')
+          this.$emit('update:customer', res.data)
+          this.$http
+            .get('/api/v1/customer')
+            .then(res2 => {
+              this.$emit('update:customers', res2.data)
+            })
+        })
+        .catch(err => {
+          this.$toasted.err('Failed to set preferred address')
+          console.log(err)
+        })
+    },
   },
   watch: {
     customer (val) {
-      console.log(val)
+      this.$refs.form.reset()
+      this.disableForm = false
       if (val) {
         this.getAllAddresses()
+      }
+    },
+    address (val) {
+      if (val) {
+        this.disableForm = true
+        this.street = val.address
+        this.city = val.city
+        this.state = val.state
+        this.zip = val.zip
+        // this.$emit('update:address', {
+        //   address: this.street,
+        //   city: this.city,
+        //   state: this.state,
+        //   zip: this.zip,
+        //   id: this.address.id
+        // })
+      } else {
+        this.$refs.form.reset()
+        this.disableForm = false
+        // this.$emit('update:address', null)
       }
     }
   }

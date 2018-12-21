@@ -105,10 +105,10 @@
 <script>
 export default {
   name: 'customer',
+  props: ['customers'],
   data () {
     return {
       customer: null,
-      customers: [],
       byField: 'name',
       byFields: [
         'name',
@@ -120,7 +120,7 @@ export default {
       name: '',
       nameRules: [
         v => !!v || 'Name is required',
-        v => v.length <= 70 || 'Name must be less than 70 characters'
+        v => !!v && v.length <= 70 || 'Name must be less than 70 characters'
       ],
       email: '',
       emailRules: [
@@ -165,7 +165,7 @@ export default {
     getAllCustomers () {
       this.$http.get('/api/v1/customer')
         .then(res => {
-          this.customers = res.data
+          this.$emit('update:customers', res.data)
         })
     },
     createCustomer () {
@@ -178,8 +178,8 @@ export default {
           })
           .then(res => {
             this.$toasted.show('Customer created')
-            this.customer = res.data
-            console.log(res)
+            this.$emit('update:customer', res.data)
+            this.getAllCustomers()
           })
           .catch(err => {
             this.$toasted.err('Failed to create customer')
@@ -197,8 +197,8 @@ export default {
           })
           .then(res => {
             this.$toasted.show('Customer updated')
-            this.customer = res.data
-            console.log(res)
+            this.$emit('update:customer', res.data)
+            this.getAllCustomers()
           })
           .catch(err => {
             this.$toasted.err('Failed to update customer')
@@ -217,12 +217,7 @@ export default {
         this.email = val.email
         this.phone = val.phone
         this.disableForm = true
-        this.$emit('update:customer', {
-          name: this.name,
-          email: this.email,
-          phone: this.phone,
-          id: this.customer.id
-        })
+        this.$emit('update:customer', this.customer)
       } else {
         this.$refs.form.reset()
         this.disableForm = false

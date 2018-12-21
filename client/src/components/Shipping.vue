@@ -4,7 +4,7 @@
       <v-container grid-list-md text-xs-center>
         <v-layout row wrap>
           <v-flex xs12>
-            <h2>Choose an Address</h2>
+            <h2>Choose a Shipping Address</h2>
           </v-flex>
           <v-flex xs12>
             <v-select
@@ -20,7 +20,12 @@
           <v-flex xs12>
             <v-divider></v-divider>
           </v-flex>
+        </v-layout>
+      </v-container>
 
+        <v-form ref="form" v-model="valid">
+        <v-container>
+          <v-layout row wrap>
           <v-flex xs12>
             <v-text-field
               v-model="street"
@@ -62,12 +67,18 @@
               :disabled="disableForm"
             ></v-text-field>
           </v-flex>
-
-      </v-layout>
-    </v-container>
+          <v-flex>
+            <v-btn :disabled="!valid" v-if="!address" @click="createAddress();" style="float: left;" color="primary">Create Address</v-btn>
+            <v-btn :disabled="!valid" v-if="address && !disableForm" @click="updateAddress(); disableForm = !disableForm;" style="float: left;">Update Address</v-btn>
+            <v-btn v-if="address && disableForm" @click="disableForm = !disableForm" style="float: left;">Edit Address</v-btn>
+          </v-flex>
+        </v-layout>
+      </v-container>
+      </v-form>
 
     <v-card-actions>
       <v-btn @click.native="$emit('previous')">Previous</v-btn>
+      <v-btn :disabled="!address" @click.native="$emit('next')">Next</v-btn>
       <v-btn @click.native="$emit('cancel')" class="warning">Cancel</v-btn>
     </v-card-actions>
 
@@ -83,7 +94,7 @@ export default {
   data () {
     return {
       addresses: [],
-      address: {},
+      address: null,
       street: '',
       city: '',
       state: '',
@@ -109,20 +120,59 @@ export default {
           .toLowerCase()
           .indexOf(query.toString().toLowerCase()) > -1
       },
+      valid: false,
       disableForm: false
     }
   },
   mounted () {
-
   },
   methods: {
+    getAllAddresses () {
+      this.$http
+        .get(`/api/v1/shippingaddress/${this.customer.id}`)
+        .then(res => {
+          this.$toasted.show('Addresses fetched')
+          this.addresses = res.data
+        })
+        .catch(err => {
+          this.$toasted.error('Failed to fetch addresses')
+          console.log(err)
+        })
+    },
+    createAddress () {
+      if (this.$refs.form.validate()) {
+        this.$http
+          .post('/api/v1/shippingaddress', {
+            customerID  : this.customer.id,
+            address     : this.street,
+            city        : this.city,
+            state       : this.state,
+            zip         : this.zip
+          })
+          .then(res => {
+            this.$toasted.show('Address created')
+            this.address = res.data
+          })
+          .catch(err => {
+            this.$toasted.err('Failed to create address')
+            console.log(err)
+          })
+      }
+    },
+    updateAddress () {
 
+    }
   },
   computed: {
 
   },
   watch: {
-
+    customer (val) {
+      console.log(val)
+      if (val) {
+        this.getAllAddresses()
+      }
+    }
   }
 }
 </script>

@@ -22,18 +22,18 @@
         />
       </v-stepper-content>
       <v-stepper-content step="2">
-        <Subscription
+        <Shipping
           :customer="customer"
-          @update:subscription="subscription = $event"
+          @update:address="shippingAddress = $event"
           @next="stepper = 3"
           @previous="stepper = 1"
           @cancel="stepper = 1"
         />
       </v-stepper-content>
       <v-stepper-content step="3">
-        <Shipping
+        <Subscription
           :customer="customer"
-          @update:address="shippingAddress = $event"
+          @update:subscription="subscription = $event"
           @previous="stepper = 2"
           @cancel="stepper = 1"
         />

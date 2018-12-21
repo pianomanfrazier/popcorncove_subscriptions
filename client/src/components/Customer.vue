@@ -190,7 +190,7 @@ export default {
     updateCustomer () {
       if (this.$refs.form.validate()) {
         this.$http
-          .put('/api/v1/customer/' + this.customer.id, {
+          .put(`/api/v1/customer/${this.customer.id}`, {
             name: this.name,
             phone: this.phone,
             email: this.email
@@ -220,7 +220,8 @@ export default {
         this.$emit('update:customer', {
           name: this.name,
           email: this.email,
-          phone: this.phone
+          phone: this.phone,
+          id: this.customer.id
         })
       } else {
         this.$refs.form.reset()

@@ -1,5 +1,6 @@
 from flask import abort
 import hashlib
+from datetime import datetime
 from . import db
 from . import app
 from sqlalchemy.sql import func
@@ -10,7 +11,7 @@ class Customer(db.Model):
   name          = db.Column(db.String(70), index=True)
   phone         = db.Column(db.String(25), index=True)
   email         = db.Column(db.String(255), index=True)
-  time_created  = db.Column(db.DateTime(timezone=True), server_default=func.now(), index=True) 
+  time_created  = db.Column(db.DateTime(timezone=True), server_default=func.now()) 
 
   def __repr__(self):
     return '<Customer {}>'.format(self.name)
@@ -35,11 +36,11 @@ class Customer(db.Model):
 class Subscription(db.Model):
   __tablename__     = 'subscription'
   id                = db.Column(db.Integer, primary_key=True)
-  customerID        = db.Column(db.Integer, db.ForeignKey('customer.id')) 
-  itemID            = db.Column(db.Integer, db.ForeignKey('item.id')) 
-  shippingAddressID = db.Column(db.Integer, db.ForeignKey('shippingaddress.id'))
-  startDate         = db.Column(db.Date)
-  stopDate          = db.Column(db.Date)
+  customerID        = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False) 
+  itemID            = db.Column(db.Integer, db.ForeignKey('item.id'), nullable=False) 
+  shippingAddressID = db.Column(db.Integer, db.ForeignKey('shippingaddress.id'), nullable=False)
+  startDate         = db.Column(db.Date, nullable=False)
+  stopDate          = db.Column(db.Date, nullable=False)
   note              = db.Column(db.String(255))
 
   def __repr__(self):
@@ -49,7 +50,7 @@ class Subscription(db.Model):
     return {
       'id'                : self.id,
       'customerID'        : self.customerID, 
-      'itemID'            : self.itemId,
+      'itemID'            : self.itemID,
       'shippingAddressID' : self.shippingAddressID,
       'startDate'         : self.startDate,
       'stopDate'          : self.stopDate,
@@ -58,11 +59,13 @@ class Subscription(db.Model):
   
   def from_dict(self, data):
     try:
+      startDate = datetime.strptime(data['startDate'], '%Y-%m')
+      stopDate = datetime.strptime(data['stopDate'], '%Y-%m')
       self.customerID        = data['customerID'] 
       self.itemID            = data['itemID'] 
       self.shippingAddressID = data['shippingAddressID'] 
-      self.startDate         = data['startDate'] 
-      self.stopDate          = data['stopDate'] 
+      self.startDate         = startDate
+      self.stopDate          = stopDate
       self.note              = data['note'] 
     except KeyError:
       abort(400)
@@ -91,17 +94,18 @@ class Item(db.Model):
 class ShippingAddress(db.Model):
   __tablename__ = 'shippingaddress'
   id            = db.Column(db.Integer, primary_key=True)
-  customerID    = db.Column(db.Integer, db.ForeignKey('customer.id')) 
-  address       = db.Column(db.String(100))
-  city          = db.Column(db.String(40))
-  state         = db.Column(db.String(40))
-  zip           = db.Column(db.String(11))
+  customerID    = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False) 
+  address       = db.Column(db.String(100), nullable=False)
+  city          = db.Column(db.String(40), nullable=False)
+  state         = db.Column(db.String(40), nullable=False)
+  zip           = db.Column(db.String(11), nullable=False)
 
   def __repr__(self):
     return '<ShippingAddress {}>'.format(self.address)
 
   def to_dict(self):
     return {
+      'id'           : self.id,
       'customerID'   : self.customerID, 
       'address'      : self.address, 
       'city'         : self.city, 
@@ -111,7 +115,6 @@ class ShippingAddress(db.Model):
   
   def from_dict(self, data):
     try:
-      self.id            = data['id'] 
       self.customerID    = data['customerID'] 
       self.address       = data['address'] 
       self.city          = data['city'] 

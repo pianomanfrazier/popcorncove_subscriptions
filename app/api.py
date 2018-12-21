@@ -72,8 +72,8 @@ def get_subscriptions():
 
 @api.route('/subscription/<int:id>', methods=['GET'])
 def get_subscription(id):
-  subscription = Subscription.query.get(id)
-  return jsonify(subscription.to_dict()), 200
+  subscriptions = Subscription.query.filter_by(customerID=id).all()
+  return jsonify([i.to_dict() for i in subscriptions]), 200
 
 @api.route('/subscription', methods=['POST'])
 def create_subscription():
@@ -91,14 +91,15 @@ def delete_subscription(id):
 
 # ShippingAddress Routes
 @api.route('/shippingaddress', methods=['GET'])
-def get_shippingaddresss():
-  shippingaddresss = ShippingAddress.query.all()
-  return jsonify([i.to_dict() for i in shippingaddresss]), 200
+def get_shippingaddresses():
+  shippingaddresses = ShippingAddress.query.all()
+  return jsonify([i.to_dict() for i in shippingaddresses]), 200
 
 @api.route('/shippingaddress/<int:id>', methods=['GET'])
 def get_shippingaddress(id):
-  shippingaddress = ShippingAddress.query.get(id)
-  return jsonify(shippingaddress.to_dict()), 200
+  """get all addresses by customer id"""
+  shippingaddresses = ShippingAddress.query.filter_by(customerID=id).all()
+  return jsonify([i.to_dict() for i in shippingaddresses]), 200
 
 @api.route('/shippingaddress', methods=['POST'])
 def create_shippingaddress():
@@ -137,4 +138,11 @@ def update_item(id):
 
 @api.route('/item/<int:id>', methods=['DELETE'])
 def delete_item(id):
+  return delete_model(Item, id)
+
+@api.route('/item', methods=['DELETE'])
+def delete_items():
+  """delete all items in a list"""
+  data = request.get_json()
+  # TODO: delete list of items
   return delete_model(Item, id)

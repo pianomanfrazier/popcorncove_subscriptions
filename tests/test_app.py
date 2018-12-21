@@ -84,10 +84,95 @@ def test_delete_customer(client):
   rv = client.delete('/api/v1/customer/1')
   assert rv.status == '200 OK'
 
-# Subscription Tests
-
-
 # ShippingAddress Tests
+def test_create_address(client):
+  client.post('/api/v1/customer', json=dict(
+    name='Bob Jones',
+    phone='(123) 456-7890',
+    email='bob@jones.com'
+  ))
+  rv = client.post('/api/v1/shippingaddress', json=dict(
+    customerID='1',
+    address='123 N 1400 E',
+    city='Leadville',
+    state='Colorado',
+    zip='12345'
+  ))
+  assert  rv.status == '201 CREATED'
+
+def test_update_address(client):
+  client.post('/api/v1/customer', json=dict(
+    name='Bob Jones',
+    phone='(123) 456-7890',
+    email='bob@jones.com'
+  ))
+  client.post('/api/v1/shippingaddress', json=dict(
+    customerID='1',
+    address='123 N 1400 E',
+    city='Leadville',
+    state='Colorado',
+    zip='12345'
+  ))
+  rv = client.put('/api/v1/shippingaddress/1', json=dict(
+    customerID='1',
+    address='543 N 1400 E',
+    city='Leadville',
+    state='Colorado',
+    zip='12345'
+  ))
+  assert b'543' in rv.data
+
+def test_get_addresses(client):
+  client.post('/api/v1/customer', json=dict(
+    name='Bob Jones',
+    phone='(123) 456-7890',
+    email='bob@jones.com'
+  ))
+  client.post('/api/v1/shippingaddress', json=dict(
+    customerID='1',
+    address='123 N 1400 E',
+    city='Leadville',
+    state='Colorado',
+    zip='12345'
+  ))
+  rv = client.get('/api/v1/shippingaddress/1')
+  assert  rv.status == '200 OK'
+
+# Subscription Tests
+def test_get_subscriptions(client):
+  client.post('/api/v1/customer', json=dict(
+    name='Bob Jones',
+    phone='(123) 456-7890',
+    email='bob@jones.com'
+  ))
+  client.post('/api/v1/shippingaddress', json=dict(
+    customerID='1',
+    address='123 N 1400 E',
+    city='Leadville',
+    state='Colorado',
+    zip='12345'
+  ))
+  rv = client.post('/api/v1/subscription', json=dict(
+    customerID        = '1',
+    itemID            = '1',
+    shippingAddressID = '1',
+    startDate         = '2019-4',
+    stopDate          = '2019-1',
+    note              = 'Extra cheese please.' 
+  ))
+  assert rv.status == '201 CREATED'
+
 
 
 # Item Tests
+def test_create_items(client):
+  client.post('/api/v1/item', json=dict(
+    name='Popcorn'
+  ))
+  client.post('/api/v1/item', json=dict(
+    name='Candy'
+  ))
+  rv = client.post('/api/v1/item', json=dict(
+    name='Surprise'
+  ))
+  assert rv.status == '201 CREATED'

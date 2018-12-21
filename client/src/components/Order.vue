@@ -25,37 +25,37 @@
                 <h2>Choose a Customer</h2>
               </v-flex>
               <v-flex xs8>
-                <v-select
+                <v-autocomplete
                   v-if="byField === 'name'"
                   v-model="customer"
                   :items="customers"
+                  :return-object="true"
                   item-text="name"
                   label="Customer Name"
-                  autocomplete
                   :filter="customernamefilter"
                   clearable
-                ></v-select>
-                <v-select
+                ></v-autocomplete>
+                <v-autocomplete
                   v-if="byField === 'email'"
                   v-model="customer"
                   :items="customers"
+                  :return-object="true"
                   item-text="email"
                   label="Customer Email"
-                  autocomplete
                   :filter="customeremailfilter"
                   clearable
-                ></v-select>
-                <v-select
+                ></v-autocomplete>
+                <v-autocomplete
                   v-if="byField === 'phone'"
                   v-model="customer"
                   :items="customers"
+                  :return-object="true"
                   mask="phone"
                   item-text="phone"
                   label="Customer Phone"
-                  autocomplete
                   :filter="customerphonefilter"
                   clearable
-                ></v-select>
+                ></v-autocomplete>
               </v-flex>
               <v-flex xs4>
                 <v-select
@@ -119,7 +119,7 @@
         </v-card>
       </v-stepper-content>
       <v-stepper-content step="2">
-      <v-card style="max-width: 55em; margin: auto;" flat>
+      <v-card v-if="customer" style="max-width: 55em; margin: auto;" flat>
           <v-card-title primary-title><h1 class="headline mb-0">Shipping Address for <em>{{ customer.name }}</em></h1></v-card-title>
             <v-container grid-list-md text-xs-center>
               <v-layout row wrap>
@@ -130,9 +130,9 @@
                   <v-select
                     v-model="address"
                     :items="addresses"
+                    :return-object="true"
                     item-text="address"
                     label="Address"
-                    autocomplete
                     :filter="addressfilter"
                     clearable
                   ></v-select>
@@ -146,6 +146,10 @@
               <v-form ref="shippingForm" v-model="validShipping">
               <v-container>
                 <v-layout row wrap>
+                <v-flex xs4>
+                  <span v-if="!!address && customer.preferredShippingAddress === address.id">Preferred Address</span>
+                  <v-btn v-else :disabled="!(address && address.id)" @click="setPreferredAddress()">Set as Preferred Address</v-btn>
+                </v-flex>
                 <v-flex xs12>
                   <v-text-field
                     v-model="street"
@@ -172,7 +176,6 @@
                     item-text="name"
                     item-value="name"
                     label="State"
-                    autocomplete
                     :filter="statefilter"
                     required
                     :disabled="disableShippingForm"
@@ -186,10 +189,6 @@
                     :rules="zipRules"
                     :disabled="disableShippingForm"
                   ></v-text-field>
-                </v-flex>
-                <v-flex xs4>
-                  <span v-if="!!address && customer.preferredShippingAddress === address.id">Preferred Address</span>
-                  <v-btn v-else :disabled="!(address && address.id)" @click="setPreferredAddress()">Set as Preferred Address</v-btn>
                 </v-flex>
                 <v-flex>
                   <v-btn :disabled="!validShipping" v-if="!address" @click="createAddress();" style="float: left;" color="primary">Create Address</v-btn>
@@ -208,49 +207,183 @@
         </v-card>
       </v-stepper-content>
       <v-stepper-content step="3">
-        <Subscription
-          :customer="customer"
-          @update:subscription="subscription = $event"
-          @previous="stepper = 2"
-          @cancel="stepper = 1; customer = {};"
-        />
+        <v-card v-if="item" style="max-width: 55em; margin: auto;" flat>
+          <v-card-title primary-title>
+            <h1 class="headline mb-0">
+            Subscription for <em>{{ customer.name }}</em>
+            </h1>
+          </v-card-title>
+
+          <v-container grid-list-md text-xs-center>
+            <v-layout row wrap>
+              <v-flex xs12>
+                <h2>Choose a Subscription</h2>
+              </v-flex>
+              <v-flex xs4>
+                <v-autocomplete
+                  v-model="subscription"
+                  :items="subscriptions"
+                  item-text="id"
+                  label="Subscription Number"
+                  :filter="subscriptionfilter"
+                  :return-object="true"
+                  clearable
+                ></v-autocomplete>
+              </v-flex>
+            <v-flex xs12>
+              <v-divider></v-divider>
+            </v-flex>
+            </v-layout>
+          </v-container>
+
+          <v-form ref="subscriptionForm" v-model="valid">
+            <v-container>
+              <v-layout row wrap>
+              <v-flex xs12>
+                <v-autocomplete
+                  v-model="item"
+                  :items="items"
+                  item-text="name"
+                  :rules="[v => !!v || 'Item is required']"
+                  :return-object="true"
+                  label="Order Item"
+                  required
+                  :disabled="disableForm"
+                ></v-autocomplete>
+              </v-flex>
+              <v-flex xs5>
+              <v-menu
+                ref="startmenu"
+                :close-on-content-click="false"
+                v-model="startDatemenu"
+                :nudge-right="40"
+                :return-value.sync="startDate"
+                lazy
+                transition="scale-transition"
+                offset-y
+                full-width
+                max-width="290px"
+                min-width="290px"
+              >
+                <v-text-field
+                  slot="activator"
+                  v-model="startDateFormatted"
+                  label="Choose Start Month"
+                  prepend-icon="event"
+                  :rules="[v => !!v || 'Item is required']"
+                  :disabled="disableForm"
+                  required
+                  readonly
+                ></v-text-field>
+                <v-date-picker
+                  v-model="startDate"
+                  type="month"
+                  :allowed-dates="allowedStartDates"
+                  scrollable
+                >
+                </v-date-picker>
+                <v-spacer></v-spacer>
+                <v-btn flat color="primary" @click="startDatemenu = false">Cancel</v-btn>
+                <v-btn flat color="primary" @click="$refs.startmenu.save(startDate)">OK</v-btn>
+              </v-menu>
+              </v-flex>
+              <v-flex xs5 offset-xs1>
+              <v-menu
+                ref="endmenu"
+                :close-on-content-click="false"
+                v-model="stopDatemenu"
+                :nudge-right="40"
+                :return-value.sync="stopDate"
+                lazy
+                transition="scale-transition"
+                offset-y
+                full-width
+                max-width="290px"
+                min-width="290px"
+              >
+                <v-text-field
+                  slot="activator"
+                  v-model="stopDateFormatted"
+                  label="Choose Ending Month"
+                  prepend-icon="event"
+                  :rules="[v => !!v || 'Item is required']"
+                  :disabled="disableForm"
+                  required
+                  readonly
+                ></v-text-field>
+                <v-date-picker
+                  v-model="stopDate"
+                  type="month"
+                  :allowed-dates="allowedEndDates"
+                  scrollable
+                >
+                </v-date-picker>
+                <v-spacer></v-spacer>
+                <v-btn flat color="primary" @click="stopDatemenu = false">Cancel</v-btn>
+                <v-btn flat color="primary" @click="$refs.endmenu.save(stopDate)">OK</v-btn>
+              </v-menu>
+              </v-flex>
+              <v-flex xs12>
+                <v-textarea
+                  v-model="note" 
+                  label="Notes"
+                ></v-textarea>
+              </v-flex>
+              <v-flex>
+                <v-btn :disabled="!valid" v-if="!subscription" @click="createSubscription();" style="float: left;" color="primary">Create Subscription</v-btn>
+                <v-btn :disabled="!valid" v-if="subscription && !disableForm" @click="updateSubscription(); disableForm = !disableForm;" style="float: left;">Update Subscription</v-btn>
+                <v-btn v-if="subscription && disableForm" @click="disableForm = !disableForm" style="float: left;">Edit Subscription</v-btn>
+              </v-flex>
+            </v-layout>
+            </v-container>
+          </v-form>
+
+          <v-card-actions>
+            <v-btn @click.native="stepper = 2">Previous</v-btn>
+            <v-btn @click.native="stepper = 1;" class="warning">Cancel</v-btn>
+            <v-btn @click.native="orderDialog = true">Preview Subscription</v-btn>
+          </v-card-actions>
+
+        </v-card>
       </v-stepper-content>
     </v-stepper-items>
   </v-stepper>
 
-  <!-- <v-dialog v-model="orderDialog" width="300px">
+  <v-dialog v-model="orderDialog" width="300px">
     <v-card tile>
       <v-card-text>
         You are about to place the following order:
         <p v-if="customer">
-        <b>Customer:</b> {{ customer.name.first }} {{ customer.name.last }} <br>
-        <b>Item:</b> {{ select }} <br>
-        <b>Subscription Dates:</b> {{ startdate | formatDate }} to {{ enddate | formatDate }}
+        <b>Customer:</b> {{ customer.name }}<br>
+        <b>Item:</b> {{ item.name }} <br>
+        <b>Subscription Dates:</b> {{ startDate | formatDate }} to {{ stopDate | formatDate }}
+        <b>Shipping Address:</b> {{ address.address }}, {{ address.city }}, {{ address.state }} {{ address.zip}}
         </p>
       </v-card-text>
       <v-card-actions>
-        <v-btn @click="orderDialog = false; placeOrder" color="primary">Confirm</v-btn>
-        <v-btn @click="orderDialog = false">Cancel</v-btn>
+        <v-btn @click="orderDialog = false">Close</v-btn>
       </v-card-actions>
     </v-card>
-  </v-dialog> -->
+  </v-dialog>
+
 </div>
 </template>
 
 <script>
+import isFuture from 'date-fns/is_future'
+import isAfter from 'date-fns/is_after'
+import isBefore from 'date-fns/is_before'
+import format from 'date-fns/format'
+
 let states = require('../assets/states_titlecase.json')
-import Subscription from './Subscription'
 
 export default {
   name: 'order',
-  components: {
-    Subscription,
-  },
   data () {
     return {
       customer: {},
       customers: [],
-      address: '',
+      address: {},
       addresses: [],
       subscription: {},
       subscriptions: [],
@@ -347,12 +480,30 @@ export default {
           .indexOf(query.toString().toLowerCase()) > -1
       },
       validShipping: false,
-      disableShippingForm: true
+      disableShippingForm: true,
       // Subscription Data
+      valid: false,
+      disableForm: false,
+      item: {},
+      items: [],
+      startDate: '',
+      stopDate: '',
+      startDatemenu: false,
+      stopDatemenu: false,
+      note: '',
+      subscriptionfilter (item, queryText, itemText) {
+        const hasValue = val => val != null ? val : ''
+        const text = hasValue(item.phone)
+        const query = hasValue(queryText)
+        return text.toString()
+          .toLowerCase()
+          .indexOf(query.toString().toLowerCase()) > -1
+      },
     }
   },
   mounted () {
     this.getAllCustomers()
+    this.getItems()
   },
   methods: {
     // Customer Methods
@@ -487,8 +638,93 @@ export default {
         })
     },
     // Subscription Methods
+    getItems () {
+      this.$http.get('/api/v1/item')
+        .then(res => {
+          this.items = res.data
+        })
+        .catch(err => {
+          this.$toasted.error('Failed to fetch subscription items')
+        })
+    },
+    getAllSubscriptions () {
+      this.$http.get(`/api/v1/subscription/${this.customer.id}`)
+        .then(res => {
+          this.subscriptions = res.data
+          if (this.subscriptions.length > 0) {
+            this.subscription = this.subscriptions[0]
+          }
+        })
+        .catch(err => {
+          this.$toasted.error('Failed to fetch subscriptions')
+        })
+    },
+    allowedStartDates (val) {
+      // return false for any date before today
+      return isFuture(val)
+    },
+    allowedEndDates (val) {
+      // return false for any date before startDate
+      return !isBefore(val, this.startDate) && isFuture(val)
+    },
+    updateSubscription () {
+      if (this.$refs.subscriptionForm.validate()) {
+        this.$http
+          .put(`/api/v1/subscription/${this.subscription.id}`, {
+            customerID        : this.customer.id,
+            itemID            : this.item.id,
+            shippingAddressID : this.address.id,
+            startDate         : this.startDate,
+            stopDate          : this.stopDate,
+            note              : this.note
+          })
+          .then(res => {
+            this.$toasted.show('Subscription updated')
+            this.subscription = res.data
+            this.getAllSubscriptions()
+          })
+          .catch(err => {
+            this.$toasted.err('Failed to update subscription')
+            console.log(err)
+          })
+      }
+    },
+    createSubscription () {
+      if (this.$refs.subscriptionForm.validate()) {
+        this.$http
+          .post('/api/v1/subscription', {
+            customerID        : this.customer.id,
+            itemID            : this.item.id,
+            shippingAddressID : this.address.id,
+            startDate         : this.startDate,
+            stopDate          : this.stopDate,
+            note              : this.note
+          })
+          .then(res => {
+            this.$toasted.show('Subscription created')
+            this.subscription = res.data
+            this.getAllSubscriptions()
+          })
+          .catch(err => {
+            this.$toasted.err('Failed to create subscription')
+            console.log(err)
+          })
+      }
+    }
   },
   computed: {
+    startDateFormatted () {
+      if (this.startDate) {
+        return format(this.startDate, 'MMMM YYYY')
+      }
+      return ''
+    },
+    stopDateFormatted () {
+      if (this.stopDate) {
+        return format(this.stopDate, 'MMMM YYYY')
+      }
+      return ''
+    }
   },
   watch: {
     customer (val) {
@@ -499,8 +735,13 @@ export default {
         this.disableCustomerForm = true
         this.getAllAddresses()
       } else {
+        // reset all the forms ahead of it
         this.$refs.customerForm.reset()
         this.disableCustomerForm = false
+        // this.$refs.shippingForm.reset()
+        // this.disableShippingForm = false
+        // this.$refs.subscriptionForm.reset()
+        // this.disableForm = false
       }
     },
     address (val) {
@@ -510,9 +751,31 @@ export default {
         this.city = val.city
         this.state = val.state
         this.zip = val.zip
+        this.getAllSubscriptions()
       } else {
         this.$refs.shippingForm.reset()
         this.disableShippingForm = false
+        // this.$refs.subscriptionForm.reset()
+        // this.disableForm = false
+      }
+    },
+    subscription (val) {
+      if (val) {
+        let item = this.items.filter(el => el.id === this.subscription.itemID)[0]
+        this.disableForm = true
+        this.item = item
+        this.stopDate = val.stopDate
+        this.startDate = val.startDate
+        this.note = val.note
+      } else {
+        this.$refs.subscriptionForm.reset()
+        this.disableForm = false
+      }
+    },
+    startDate () {
+      // if the startDate is set past the stopDate reset it
+      if (isAfter(this.startDate, this.stopDate)) {
+        this.stopDate = ''
       }
     }
   }

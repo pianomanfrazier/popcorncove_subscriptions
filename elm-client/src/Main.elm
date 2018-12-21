@@ -5,9 +5,8 @@ import Browser
 import Browser.Navigation as Nav
 import Dict
 import Html
-import Page.Search as Search
+import Page.Items as Items
 import Page.Home as Home
-import Page.Admin as Admin
 import Skeleton
 import Url
 import Url.Parser as Parser exposing (Parser, (</>), custom, fragment, map, oneOf, s, top)
@@ -39,10 +38,9 @@ type alias Model =
 
 
 type Page
-  = Search Search.Model
+  = Items Items.Model
   | NotFound
   | Home Home.Model
-  | Admin Admin.Model
 
 
 
@@ -68,14 +66,11 @@ view model =
         , kids = [ Html.div [] [ Html.text "404 Not Found"] ]
         }
 
-    Search search ->
-      Skeleton.view SearchMsg (Search.view search)
+    Items items->
+      Skeleton.view ItemsMsg (Items.view items)
 
     Home home ->
       Skeleton.view HomeMsg (Home.view home)
-
-    Admin admin ->
-      Skeleton.view AdminMsg (Admin.view admin)
 
 
 
@@ -86,7 +81,7 @@ init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init _ url key =
   stepUrl url
     { key = key
-    , page = Search ( Search.Model 5 )
+    , page = Items ( Items.Model 5 )
     }
 
 
@@ -98,8 +93,7 @@ type Msg
   = NoOp
   | LinkClicked Browser.UrlRequest
   | UrlChanged Url.Url
-  | SearchMsg Search.Msg
-  | AdminMsg Admin.Msg
+  | ItemsMsg Items.Msg
   | HomeMsg Home.Msg
 
 
@@ -125,9 +119,9 @@ update message model =
     UrlChanged url ->
       stepUrl url model
 
-    SearchMsg msg ->
+    ItemsMsg msg ->
       case model.page of
-        Search search -> stepSearch model (Search.update msg search)
+        Items items -> stepItems model (Items.update msg items)
         _             -> ( model, Cmd.none )
 
     HomeMsg msg ->
@@ -135,23 +129,12 @@ update message model =
         Home home -> stepHome model (Home.update msg home)
         _         -> ( model, Cmd.none )
 
-    AdminMsg msg ->
-      case model.page of
-        Admin admin -> stepAdmin model (Admin.update msg admin)
-        _         -> ( model, Cmd.none )
 
 
-stepSearch : Model -> ( Search.Model, Cmd Search.Msg ) -> ( Model, Cmd Msg )
-stepSearch model (search, cmds) =
-  ( { model | page = Search search }
-  , Cmd.map SearchMsg cmds
-  )
-
-
-stepAdmin : Model -> ( Admin.Model, Cmd Admin.Msg ) -> ( Model, Cmd Msg )
-stepAdmin model (admin, cmds) =
-  ( { model | page = Admin admin }
-  , Cmd.map AdminMsg cmds
+stepItems : Model -> ( Items.Model, Cmd Items.Msg ) -> ( Model, Cmd Msg )
+stepItems model (items, cmds) =
+  ( { model | page = Items items }
+  , Cmd.map ItemsMsg cmds
   )
 
 
@@ -172,10 +155,8 @@ stepUrl url model =
       oneOf
         [ route top
           ( stepHome model (Home.init 7) )
-        , route ( s "admin" )
-          ( stepAdmin model (Admin.init 8) )
-        , route ( s "search" )
-          ( stepSearch model (Search.init 9) )
+        , route ( s "items" )
+          ( stepItems model (Items.init 8) )
         ]
   in
   case Parser.parse parser url of

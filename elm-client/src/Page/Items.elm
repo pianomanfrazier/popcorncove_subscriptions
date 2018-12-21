@@ -1,4 +1,4 @@
-module Page.Admin exposing
+module Page.Items exposing
     ( Model
     , Msg
     , init
@@ -46,12 +46,11 @@ update msg model =
 
 view : Model -> Skeleton.Details Msg
 view model =
-    { title = "Admin"
+    { title = "Add Subscription Items"
     , attrs = []
     , kids =
         [ div []
-            [ span [] [ model.num |> String.fromInt |> text ]
-            , text " Admin Page"
+            [ h1 [] [text "Subscription Items"]
             ]
         ]
     }

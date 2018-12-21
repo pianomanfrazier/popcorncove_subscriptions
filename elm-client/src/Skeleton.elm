@@ -46,8 +46,7 @@ viewHeader : Html msg
 viewHeader =
     div []
         [ a [ href "/" ] [ text "Home" ]
-        , a [ href "/search"] [ text "Search" ]
-        , a [ href "/admin" ] [ text "Admin" ]
+        , a [ href "/items" ] [ text "Add Subscription Items" ]
         ]
 
 

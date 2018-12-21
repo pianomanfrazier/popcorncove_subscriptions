@@ -53,13 +53,15 @@ class Subscription(db.Model):
     return '<Subscription {}>'.format(self.id)
 
   def to_dict(self):
+    startDate = self.startDate.strftime('%Y-%m')
+    stopDate = self.stopDate.strftime('%Y-%m')
     return {
       'id'                : self.id,
       'customerID'        : self.customerID, 
       'itemID'            : self.itemID,
       'shippingAddressID' : self.shippingAddressID,
-      'startDate'         : self.startDate,
-      'stopDate'          : self.stopDate,
+      'startDate'         : startDate,
+      'stopDate'          : stopDate,
       'note'              : self.note
     }
   

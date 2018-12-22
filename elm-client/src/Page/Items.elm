@@ -6,8 +6,10 @@ module Page.Items exposing
     , view
     )
 
-import Html exposing (..)
+import Html.Styled exposing (..)
+import Html.Styled.Events as HSE
 import Skeleton
+import UI
 
 
 
@@ -29,6 +31,8 @@ init num =
 
 type Msg
     = NoOp
+    | AddItem
+    | RemoveItem
 
 
 update : Msg -> Model -> ( Model, Cmd msg )
@@ -36,6 +40,16 @@ update msg model =
     case msg of
         NoOp ->
             ( model
+            , Cmd.none
+            )
+        
+        AddItem ->
+            ( { model | num = model.num + 1 }
+            , Cmd.none
+            )
+
+        RemoveItem ->
+            ( { model | num = model.num - 1 }
             , Cmd.none
             )
 
@@ -51,6 +65,9 @@ view model =
     , kids =
         [ div []
             [ h1 [] [text "Subscription Items"]
+            , UI.btn [ HSE.onClick RemoveItem ] [ text "Remove Item" ]
+            , span [] [ text <| String.fromInt model.num ]
+            , UI.btn [ HSE.onClick AddItem ] [ text "Add Item" ]
             ]
         ]
     }

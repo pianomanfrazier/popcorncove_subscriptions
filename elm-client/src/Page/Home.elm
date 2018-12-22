@@ -6,8 +6,9 @@ module Page.Home exposing
     , view
     )
 
-import Html exposing (..)
+import Html.Styled exposing (..)
 import Skeleton
+import UI
 
 
 
@@ -52,6 +53,7 @@ view model =
         [ div []
             [ span [] [ model.num |> String.fromInt |> text ]
             , text " Home Page"
+            , UI.btn [] [ text "Another Button" ]
             ]
         ]
     }

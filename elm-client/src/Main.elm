@@ -4,7 +4,7 @@ module Main exposing (..)
 import Browser
 import Browser.Navigation as Nav
 import Dict
-import Html
+import Html.Styled as HS exposing (..)
 import Page.Items as Items
 import Page.Home as Home
 import Skeleton
@@ -63,10 +63,10 @@ view model =
       Skeleton.view never
         { title = "Not Found"
         , attrs = []
-        , kids = [ Html.div [] [ Html.text "404 Not Found"] ]
+        , kids = [ HS.div [] [ HS.text "404 Not Found"] ]
         }
 
-    Items items->
+    Items items ->
       Skeleton.view ItemsMsg (Items.view items)
 
     Home home ->

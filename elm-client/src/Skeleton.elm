@@ -4,9 +4,11 @@ module Skeleton exposing
     )
 
 import Browser
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Lazy exposing (..)
+import Css
+import Html
+import Html.Styled as HS exposing (..)
+import Html.Styled.Attributes as HSA exposing (..)
+import Html.Styled.Lazy exposing (..)
 import Json.Decode as D
 
 
@@ -16,8 +18,8 @@ import Json.Decode as D
 
 type alias Details msg =
     { title : String
-    , attrs : List (Attribute msg)
-    , kids : List (Html msg)
+    , attrs : List (HS.Attribute msg)
+    , kids : List (HS.Html msg)
     }
 
 
@@ -27,14 +29,17 @@ type alias Details msg =
 
 view : (a -> msg) -> Details a -> Browser.Document msg
 view toMsg details =
+    let
+        body =
+            div details.attrs details.kids
+    in
     { title =
         details.title
     , body =
-        [ viewHeader
-        , Html.map toMsg <|
-            div (class "center" :: details.attrs) details.kids
-        , viewFooter
-        ]
+            [ HS.toUnstyled viewHeader
+            , Html.map toMsg <| HS.toUnstyled body
+            , HS.toUnstyled viewFooter
+            ]
     }
 
 

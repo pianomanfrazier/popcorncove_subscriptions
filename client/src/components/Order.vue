@@ -119,7 +119,7 @@
         </v-card>
       </v-stepper-content>
       <v-stepper-content step="2">
-      <v-card v-if="customer" style="max-width: 55em; margin: auto;" flat>
+        <v-card v-if="customer" style="max-width: 55em; margin: auto;" flat>
           <v-card-title primary-title><h1 class="headline mb-0">Shipping Address for <em>{{ customer.name }}</em></h1></v-card-title>
             <v-container grid-list-md text-xs-center>
               <v-layout row wrap>
@@ -207,10 +207,10 @@
         </v-card>
       </v-stepper-content>
       <v-stepper-content step="3">
-        <v-card v-if="item" style="max-width: 55em; margin: auto;" flat>
+        <v-card style="max-width: 55em; margin: auto;" flat>
           <v-card-title primary-title>
             <h1 class="headline mb-0">
-            Subscription for <em>{{ customer.name }}</em>
+            Subscription for <em v-if="customer">{{ customer.name }}</em>
             </h1>
           </v-card-title>
 
@@ -327,6 +327,7 @@
                 <v-textarea
                   v-model="note" 
                   label="Notes"
+                  :disabled="disableForm"
                 ></v-textarea>
               </v-flex>
               <v-flex>
@@ -341,7 +342,7 @@
           <v-card-actions>
             <v-btn @click.native="stepper = 2">Previous</v-btn>
             <v-btn @click.native="stepper = 1;" class="warning">Cancel</v-btn>
-            <v-btn @click.native="orderDialog = true">Preview Subscription</v-btn>
+            <v-btn v-if="customer && item && address && subscription" @click.native="orderDialog = true">Preview Subscription</v-btn>
           </v-card-actions>
 
         </v-card>
@@ -349,11 +350,11 @@
     </v-stepper-items>
   </v-stepper>
 
-  <v-dialog v-model="orderDialog" width="300px">
+  <v-dialog v-model="orderDialog" v-if="customer && item && address && subscription" width="300px">
     <v-card tile>
       <v-card-text>
         You are about to place the following order:
-        <p v-if="customer">
+        <p>
         <b>Customer:</b> {{ customer.name }}<br>
         <b>Item:</b> {{ item.name }} <br>
         <b>Subscription Dates:</b> {{ startDate | formatDate }} to {{ stopDate | formatDate }}
@@ -381,11 +382,11 @@ export default {
   name: 'order',
   data () {
     return {
-      customer: {},
+      customer: undefined,
       customers: [],
-      address: {},
+      address: undefined,
       addresses: [],
-      subscription: {},
+      subscription: undefined,
       subscriptions: [],
       orderDialog: false,
       stepper: 1,
@@ -484,7 +485,7 @@ export default {
       // Subscription Data
       valid: false,
       disableForm: false,
-      item: {},
+      item: undefined,
       items: [],
       startDate: '',
       stopDate: '',
@@ -493,7 +494,7 @@ export default {
       note: '',
       subscriptionfilter (item, queryText, itemText) {
         const hasValue = val => val != null ? val : ''
-        const text = hasValue(item.phone)
+        const text = hasValue(item.id)
         const query = hasValue(queryText)
         return text.toString()
           .toLowerCase()
@@ -552,20 +553,16 @@ export default {
       }
     },
     // Shipping Methods
-    getAllAddresses () {
+    getAllAddresses (callback) {
       if (this.customer && this.customer.id) {
         this.$http
           .get(`/api/v1/shippingaddress/${this.customer.id}`)
           .then(res => {
             // this.$toasted.show('Addresses fetched')
             this.addresses = res.data
-            let address = ''
-            if (this.customer.preferredShippingAddress) {
-              address = this.addresses.filter(el => el.id === this.customer.preferredShippingAddress)[0]
-            } else if (this.addresses.length > 0) {
-              address = this.addresses[0]
+            if (callback) {
+              callback()
             }
-            this.address = address 
           })
           .catch(err => {
             // this.$toasted.error('Failed to fetch addresses')
@@ -647,12 +644,12 @@ export default {
           this.$toasted.error('Failed to fetch subscription items')
         })
     },
-    getAllSubscriptions () {
+    getAllSubscriptions (callback) {
       this.$http.get(`/api/v1/subscription/${this.customer.id}`)
         .then(res => {
           this.subscriptions = res.data
-          if (this.subscriptions.length > 0) {
-            this.subscription = this.subscriptions[0]
+          if (callback) {
+            callback()
           }
         })
         .catch(err => {
@@ -713,17 +710,27 @@ export default {
     }
   },
   computed: {
-    startDateFormatted () {
-      if (this.startDate) {
-        return format(this.startDate, 'MMMM YYYY')
+    startDateFormatted: {
+      get () {
+        if (this.startDate) {
+          return format(this.startDate, 'MMMM YYYY')
+        }
+        return ''
+      },
+      set (newValue) {
+        return format(newValue, 'YYYY-MM')
       }
-      return ''
     },
-    stopDateFormatted () {
+    stopDateFormatted: {
+      get () {
       if (this.stopDate) {
         return format(this.stopDate, 'MMMM YYYY')
       }
-      return ''
+      return 
+      },
+      set (newValue) {
+        return format(newValue, 'YYYY-MM')
+      }
     }
   },
   watch: {
@@ -733,15 +740,21 @@ export default {
         this.email = val.email
         this.phone = val.phone
         this.disableCustomerForm = true
-        this.getAllAddresses()
+        this.getAllAddresses(() => {
+          if (this.customer.preferredShippingAddress) {
+            this.address = this.addresses.filter(el => el.id === this.customer.preferredShippingAddress)[0]
+          } else if (this.addresses.length > 0) {
+            this.address = this.addresses[0]
+          }
+        })
       } else {
         // reset all the forms ahead of it
         this.$refs.customerForm.reset()
         this.disableCustomerForm = false
-        // this.$refs.shippingForm.reset()
-        // this.disableShippingForm = false
-        // this.$refs.subscriptionForm.reset()
-        // this.disableForm = false
+        this.$refs.shippingForm.reset()
+        this.disableShippingForm = false
+        this.$refs.subscriptionForm.reset()
+        this.disableForm = false
       }
     },
     address (val) {
@@ -751,19 +764,26 @@ export default {
         this.city = val.city
         this.state = val.state
         this.zip = val.zip
-        this.getAllSubscriptions()
+        this.getAllSubscriptions(() => {
+          if (this.subscriptions.length > 0) {
+            this.subscription = this.subscriptions[0]
+          }
+        })
       } else {
         this.$refs.shippingForm.reset()
         this.disableShippingForm = false
-        // this.$refs.subscriptionForm.reset()
-        // this.disableForm = false
+        this.$refs.subscriptionForm.reset()
+        this.disableForm = false
       }
     },
     subscription (val) {
       if (val) {
-        let item = this.items.filter(el => el.id === this.subscription.itemID)[0]
+        this.items.forEach(el => {
+          if (el.id === val.itemID) {
+            this.item = el
+          }
+        })
         this.disableForm = true
-        this.item = item
         this.stopDate = val.stopDate
         this.startDate = val.startDate
         this.note = val.note

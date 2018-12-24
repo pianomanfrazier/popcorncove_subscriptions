@@ -66,15 +66,16 @@ class Subscription(db.Model):
     }
   
   def from_dict(self, data):
+    if ('note' in data.keys()):
+      self.note = data['note']
     try:
-      startDate = datetime.strptime(data['startDate'], '%Y-%m')
-      stopDate = datetime.strptime(data['stopDate'], '%Y-%m')
+      startDate              = datetime.strptime(data['startDate'], '%Y-%m')
+      stopDate               = datetime.strptime(data['stopDate'], '%Y-%m')
       self.customerID        = data['customerID'] 
       self.itemID            = data['itemID'] 
       self.shippingAddressID = data['shippingAddressID'] 
       self.startDate         = startDate
       self.stopDate          = stopDate
-      self.note              = data['note'] 
     except KeyError:
       abort(400)
 

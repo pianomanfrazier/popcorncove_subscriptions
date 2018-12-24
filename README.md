@@ -4,6 +4,7 @@ This app tracks customers' subscriptions boxes. The users can input new customer
 
 # TODO
 
-- tie in front end with all endpoints
-- separate out separate step for shipping location (step 3)
 - allow admin to delete customer
+- add loading status to all AJAX buttons
+- Delete items
+- monthly subscription export

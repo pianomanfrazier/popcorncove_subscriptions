@@ -50,7 +50,6 @@
                   v-model="customer"
                   :items="customers"
                   :return-object="true"
-                  mask="phone"
                   item-text="phone"
                   label="Customer Phone"
                   :filter="customerphonefilter"
@@ -169,7 +168,7 @@
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs4>
-                  <v-select
+                  <v-autocomplete
                     v-model="state"
                     :items="states"
                     :rules="[v => !!v || 'Item is required']"
@@ -179,7 +178,7 @@
                     :filter="statefilter"
                     required
                     :disabled="disableShippingForm"
-                  ></v-select>
+                  ></v-autocomplete>
                 </v-flex>
                 <v-flex xs4>
                   <v-text-field
@@ -341,8 +340,8 @@
 
           <v-card-actions>
             <v-btn @click.native="stepper = 2">Previous</v-btn>
-            <v-btn @click.native="stepper = 1;" class="warning">Cancel</v-btn>
-            <v-btn v-if="customer && item && address && subscription" @click.native="orderDialog = true">Preview Subscription</v-btn>
+            <v-btn @click.native="stepper = 1;" class="primary">Go Back to Beginning</v-btn>
+            <v-btn v-if="customer && item && address && subscription" @click.native="orderDialog = true" class="success">Preview Subscription</v-btn>
           </v-card-actions>
 
         </v-card>
@@ -353,7 +352,7 @@
   <v-dialog v-model="orderDialog" v-if="customer && item && address && subscription" width="300px">
     <v-card tile>
       <v-card-text>
-        You are about to place the following order:
+        <h2>Subscription Preview</h2>
         <p>
         <b>Customer:</b> {{ customer.name }}<br>
         <b>Item:</b> {{ item.name }} <br>
@@ -438,14 +437,6 @@ export default {
           .toLowerCase()
           .indexOf(query.toString().toLowerCase()) > -1
       },
-      customeremailfilter (item, queryText, itemText) {
-        const hasValue = val => val != null ? val : ''
-        const text = hasValue(item.phone)
-        const query = hasValue(queryText)
-        return text.toString()
-          .toLowerCase()
-          .indexOf(query.toString().toLowerCase()) > -1
-      },
       // Shipping Data
       street: '',
       city: '',
@@ -481,7 +472,7 @@ export default {
           .indexOf(query.toString().toLowerCase()) > -1
       },
       validShipping: false,
-      disableShippingForm: true,
+      disableShippingForm: false,
       // Subscription Data
       valid: false,
       disableForm: false,
@@ -592,7 +583,7 @@ export default {
       }
     },
     updateAddress () {
-      if (this.$refs.shippingForm.validate()) {
+      if (this.$refs.shippingForm && this.$refs.shippingForm.validate()) {
         this.$http
           .put(`/api/v1/shippingaddress/${this.address.id}`, {
             customerID  : this.customer.id,
@@ -751,10 +742,18 @@ export default {
         // reset all the forms ahead of it
         this.$refs.customerForm.reset()
         this.disableCustomerForm = false
-        this.$refs.shippingForm.reset()
+
+        if (this.$refs.shippingForm)
+          this.$refs.shippingForm.reset()
         this.disableShippingForm = false
-        this.$refs.subscriptionForm.reset()
+
+        if (this.$refs.subscriptionForm)
+          this.$refs.subscriptionForm.reset()
         this.disableForm = false
+
+        this.customer = undefined
+        this.address = undefined
+        this.subscription = undefined
       }
     },
     address (val) {
@@ -772,8 +771,13 @@ export default {
       } else {
         this.$refs.shippingForm.reset()
         this.disableShippingForm = false
-        this.$refs.subscriptionForm.reset()
+
+        if (this.$refs.subscriptionForm)
+          this.$refs.subscriptionForm.reset()
         this.disableForm = false
+
+        this.address = undefined
+        this.subscription = undefined
       }
     },
     subscription (val) {
@@ -790,6 +794,9 @@ export default {
       } else {
         this.$refs.subscriptionForm.reset()
         this.disableForm = false
+        this.subscription = undefined
+        this.startDate = ''
+        this.stopDate = ''
       }
     },
     startDate () {

@@ -7,11 +7,11 @@
       </v-stepper-step>
       <v-divider></v-divider>
       <v-stepper-step :complete="stepper > 2" step="2">
-        Create or Change a Subscription
+        Choose a Shipping Address
       </v-stepper-step>
       <v-divider></v-divider>
       <v-stepper-step :complete="stepper > 3" step="3">
-        Choose a Shipping Address
+        Create or Change a Subscription
       </v-stepper-step>
     </v-stepper-header>
     <v-stepper-items>
@@ -324,7 +324,7 @@
               </v-flex>
               <v-flex xs12>
                 <v-textarea
-                  v-model="note" 
+                  v-model="note"
                   label="Notes"
                   :disabled="disableForm"
                 ></v-textarea>
@@ -717,7 +717,7 @@ export default {
       if (this.stopDate) {
         return format(this.stopDate, 'MMMM YYYY')
       }
-      return 
+      return
       },
       set (newValue) {
         return format(newValue, 'YYYY-MM')

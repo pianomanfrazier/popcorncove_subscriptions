@@ -81,9 +81,9 @@ class Subscription(db.Model):
 
 
 class Item(db.Model):
-  __tablename = 'item'
-  id          = db.Column(db.Integer, primary_key=True)
-  name        = db.Column(db.String(25))
+  __tablename__ = 'item'
+  id            = db.Column(db.Integer, primary_key=True)
+  name          = db.Column(db.String(25))
 
   def __repr__(self):
     return '<Item {}>'.format(self.name)

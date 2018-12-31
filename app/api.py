@@ -1,5 +1,7 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, make_response
 import hashlib
+import io, pyexcel
+from datetime import datetime
 import json
 from .authentication import requires_auth
 from .models import Customer, Item, ShippingAddress, Subscription
@@ -148,3 +150,40 @@ def delete_item(id):
   # then delete the item
   return delete_model(Item, id)
 
+@api.route('/export', methods=['GET'])
+def export_subscriptions():
+  year = request.args.get('year')
+  month = request.args.get('month')
+  date = datetime.strptime('{}-{}'.format(year, month), '%Y-%m')
+  subscriptions = Subscription.query\
+    .filter(date >= Subscription.startDate)\
+    .filter(date <= Subscription.stopDate)\
+    .join(Customer, Subscription.customerID == Customer.id)\
+    .join(Item, Subscription.itemID == Item.id)\
+    .join(ShippingAddress, Subscription.shippingAddressID == ShippingAddress.id)\
+    .add_columns(
+      Subscription.id,
+      Subscription.note,
+      Customer.name,
+      Customer.email,
+      Customer.phone,
+      ShippingAddress.address,
+      ShippingAddress.city,
+      ShippingAddress.state,
+      ShippingAddress.zip,
+      Item.name.label("itemName"))\
+    .all()
+
+  header = ["SUBSCRIPTION ID", "NAME","STREET","CITY","STATE", "ZIP", "EMAIL", "PHONE", "ITEM", "NOTE"]
+  data = [ header ]
+  print('------------\n')
+  for i in subscriptions:
+    sub = [i.id, i.name, i.address, i.city, i.state, i.zip, i.email, i.phone, i.itemName, i.note]
+    data.append(sub)
+  sheet = pyexcel.Sheet(data)
+  dest = io.StringIO()
+  sheet.save_to_memory("csv", dest)
+  output = make_response(dest.getvalue())
+  output.headers["Content-Disposition"] = "attachment; filename=export_{}-{}.csv".format(year, month)
+  output.headers["Content-type"] = "text/csv"
+  return output

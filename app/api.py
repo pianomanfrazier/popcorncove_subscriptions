@@ -36,7 +36,7 @@ def delete_model(model, id):
         db.session.commit()
         return jsonify({'msg': className + ' deleted', 'error': False}), 200 
     else:
-        return jsonify({'msg': className + ' not found', 'error': True}), 404
+        return jsonify({'msg': className + ' not found', 'error': True}), 400
 
 
 # Customer Routes
@@ -138,11 +138,13 @@ def update_item(id):
 
 @api.route('/item/<int:id>', methods=['DELETE'])
 def delete_item(id):
+  # migrate all subscriptions with FK for that item
+  migrationID = request.args.get('migrate')
+  subscriptions = Subscription.query.filter_by(itemID=id).all()
+  for i in subscriptions:
+    i.itemID = migrationID
+    db.session.add(i)
+  db.session.commit()
+  # then delete the item
   return delete_model(Item, id)
 
-@api.route('/item', methods=['DELETE'])
-def delete_items():
-  """delete all items in a list"""
-  data = request.get_json()
-  # TODO: delete list of items
-  return delete_model(Item, id)

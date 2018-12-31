@@ -12,24 +12,53 @@
           <v-btn :disabled="item.length === 0" @click="addItem()">Add Item</v-btn>
         </v-flex>
         <v-flex xs4 offset-xs4>
+          <h2>Subscription Items</h2>
           <v-list>
             <v-list-tile v-for="item in items" :key="item.id">
-              <v-list-tile-action>
-                <v-checkbox v-model="selected" :value="item.id"></v-checkbox>
-              </v-list-tile-action>
               <v-list-tile-content>
                 <v-list-tile-title>
                   {{ item.name }}
                 </v-list-tile-title>
               </v-list-tile-content>
+              <v-list-tile-action>
+                <v-btn @click="deleteDialog = true; deleteID = item.id; migrateID = undefined" class="error">Delete Item</v-btn>
+              </v-list-tile-action>
             </v-list-tile>
           </v-list>
 
-        <v-btn :disabled="!selected.length > 0" @click="deleteItems()" class="error">Delete Item<span v-if="selected.length > 1">s</span></v-btn>
         </v-flex>
 
       </v-layout>
     </v-container>
+
+    <v-dialog v-model="deleteDialog" width="300px">
+      <v-card tile>
+        <v-alert
+          :value="true"
+          type="warning"
+        >
+        This action cannot be undone.
+        </v-alert>
+        <v-card-text>
+          Where would you like to migrate existing subscriptions with this item?
+        </v-card-text>
+        <v-card-actions>
+          <v-radio-group v-model="migrateID">
+            <v-radio
+              v-for="item in items.filter(el => el.id !== deleteID)"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            ></v-radio>
+          </v-radio-group>
+        </v-card-actions>
+        <v-card-actions>
+          <v-btn @click="deleteDialog = false; deleteID = undefined; migrateID = undefined;">Cancel</v-btn>
+          <v-btn :disabled="!migrateID" @click="deleteItems(deleteID, migrateID)" class="error">Delete Item</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
   </v-card>
 </template>
 
@@ -39,8 +68,11 @@ export default {
   data () {
     return {
       item: '',
-      selected: [],
-      items: []
+      items: [],
+      radioGroup: undefined,
+      deleteDialog: false,
+      deleteID: undefined,
+      migrateID: undefined,
     }
   },
   mounted () {
@@ -61,9 +93,19 @@ export default {
           this.$toasted.error('Failed to add new item')
         })
     },
-    deleteItems () {
+    deleteItems (id, migrateID) {
       this.$http
-        .delete('/api/v1/item', selected)
+        .delete(`/api/v1/item/${id}`, {
+          params: {migrate: migrateID}
+        })
+        .then(res => {
+          this.$toasted.show('Item deleted')
+          this.getItems()
+          this.deleteDialog = false
+        })
+        .catch(err => {
+          this.$toasted.error('Failed to delete item')
+        })
     },
     getItems () {
       this.$http

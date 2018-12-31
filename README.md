@@ -6,5 +6,5 @@ This app tracks customers' subscriptions boxes. The users can input new customer
 
 - allow admin to delete customer
 - add loading status to all AJAX buttons
-- Delete items
 - monthly subscription export
+- lazy load customers when searching (i.e. limit 10 on type ahead)

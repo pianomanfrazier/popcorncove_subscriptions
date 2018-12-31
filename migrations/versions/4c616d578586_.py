@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: c06aafb1d21c
+Revision ID: 4c616d578586
 Revises: 
-Create Date: 2018-12-31 16:13:18.810247
+Create Date: 2018-12-31 16:35:52.159927
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'c06aafb1d21c'
+revision = '4c616d578586'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -23,9 +23,7 @@ def upgrade():
     sa.Column('name', sa.String(length=70), nullable=False),
     sa.Column('phone', sa.String(length=25), nullable=False),
     sa.Column('email', sa.String(length=255), nullable=False),
-    sa.Column('preferredShippingAddress', sa.Integer(), nullable=True),
     sa.Column('time_created', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.ForeignKeyConstraint(['preferredShippingAddress'], ['shippingaddress.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_customer_email'), 'customer', ['email'], unique=False)
@@ -38,25 +36,17 @@ def upgrade():
     )
     op.create_table('shippingaddress',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('customerID', sa.Integer(), nullable=False),
     sa.Column('address', sa.String(length=100), nullable=False),
     sa.Column('city', sa.String(length=40), nullable=False),
     sa.Column('state', sa.String(length=40), nullable=False),
     sa.Column('zip', sa.String(length=11), nullable=False),
-    sa.ForeignKeyConstraint(['customerID'], ['customer.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('subscription',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('customerID', sa.Integer(), nullable=False),
-    sa.Column('itemID', sa.Integer(), nullable=False),
-    sa.Column('shippingAddressID', sa.Integer(), nullable=False),
     sa.Column('startDate', sa.Date(), nullable=False),
     sa.Column('stopDate', sa.Date(), nullable=False),
     sa.Column('note', sa.String(length=255), nullable=True),
-    sa.ForeignKeyConstraint(['customerID'], ['customer.id'], ),
-    sa.ForeignKeyConstraint(['itemID'], ['item.id'], ),
-    sa.ForeignKeyConstraint(['shippingAddressID'], ['shippingaddress.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###

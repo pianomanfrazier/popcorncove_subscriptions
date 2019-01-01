@@ -10,6 +10,7 @@ from . import db
 api = Blueprint('api', __name__)
 
 @api.route('/', methods=['GET'])
+@requires_auth
 def index():
     return jsonify({'msg': 'Popcorn Cove Subscriptions version 1'})
 
@@ -43,102 +44,122 @@ def delete_model(model, id):
 
 # Customer Routes
 @api.route('/customer', methods=['GET'])
+@requires_auth
 def get_customers():
   customers = Customer.query.all()
   return jsonify([i.to_dict() for i in customers]), 200
 
 @api.route('/customer/<int:id>', methods=['GET'])
+@requires_auth
 def get_customer(id):
   customer = Customer.query.get(id)
   return jsonify(customer.to_dict()), 200
 
 @api.route('/customer', methods=['POST'])
+@requires_auth
 def create_customer():
   data = request.get_json()
   return create_model(Customer, data)
 
 @api.route('/customer/<int:id>', methods=['PUT'])
+@requires_auth
 def update_customer(id):
   data = request.get_json()
   return update_model(Customer, id, data)
 
 @api.route('/customer/<int:id>', methods=['DELETE'])
+@requires_auth
 def delete_customer(id):
   return delete_model(Customer, id)
 
 # Subscription Routes
 @api.route('/subscription', methods=['GET'])
+@requires_auth
 def get_subscriptions():
   subscriptions = Subscription.query.all()
   return jsonify([i.to_dict() for i in subscriptions]), 200
 
 @api.route('/subscription/<int:id>', methods=['GET'])
+@requires_auth
 def get_subscription(id):
   subscriptions = Subscription.query.filter_by(customerID=id).all()
   return jsonify([i.to_dict() for i in subscriptions]), 200
 
 @api.route('/subscription', methods=['POST'])
+@requires_auth
 def create_subscription():
   data = request.get_json()
   return create_model(Subscription, data)
 
 @api.route('/subscription/<int:id>', methods=['PUT'])
+@requires_auth
 def update_subscription(id):
   data = request.get_json()
   return update_model(Subscription, id, data)
 
 @api.route('/subscription/<int:id>', methods=['DELETE'])
+@requires_auth
 def delete_subscription(id):
   return delete_model(Subscription, id)
 
 # ShippingAddress Routes
 @api.route('/shippingaddress', methods=['GET'])
+@requires_auth
 def get_shippingaddresses():
   shippingaddresses = ShippingAddress.query.all()
   return jsonify([i.to_dict() for i in shippingaddresses]), 200
 
 @api.route('/shippingaddress/<int:id>', methods=['GET'])
+@requires_auth
 def get_shippingaddress(id):
   """get all addresses by customer id"""
   shippingaddresses = ShippingAddress.query.filter_by(customerID=id).all()
   return jsonify([i.to_dict() for i in shippingaddresses]), 200
 
 @api.route('/shippingaddress', methods=['POST'])
+@requires_auth
 def create_shippingaddress():
   data = request.get_json()
   return create_model(ShippingAddress, data)
 
 @api.route('/shippingaddress/<int:id>', methods=['PUT'])
+@requires_auth
 def update_shippingaddress(id):
   data = request.get_json()
   return update_model(ShippingAddress, id, data)
 
 @api.route('/shippingaddress/<int:id>', methods=['DELETE'])
+@requires_auth
 def delete_shippingaddress(id):
   return delete_model(ShippingAddress, id)
 
 # Item Routes
 @api.route('/item', methods=['GET'])
+@requires_auth
 def get_items():
   items = Item.query.all()
   return jsonify([i.to_dict() for i in items]), 200
 
 @api.route('/item/<int:id>', methods=['GET'])
+@requires_auth
 def get_item(id):
   item = Item.query.get(id)
   return jsonify(item.to_dict()), 200
 
 @api.route('/item', methods=['POST'])
+@requires_auth
 def create_item():
   data = request.get_json()
   return create_model(Item, data)
 
 @api.route('/item/<int:id>', methods=['PUT'])
+@requires_auth
 def update_item(id):
   data = request.get_json()
   return update_model(Item, id, data)
 
 @api.route('/item/<int:id>', methods=['DELETE'])
+@requires_auth
 def delete_item(id):
   # migrate all subscriptions with FK for that item
   migrationID = request.args.get('migrate')
@@ -151,6 +172,7 @@ def delete_item(id):
   return delete_model(Item, id)
 
 @api.route('/export', methods=['GET'])
+@requires_auth
 def export_subscriptions():
   year = request.args.get('year')
   month = request.args.get('month')
@@ -176,7 +198,6 @@ def export_subscriptions():
 
   header = ["SUBSCRIPTION ID", "NAME","STREET","CITY","STATE", "ZIP", "EMAIL", "PHONE", "ITEM", "NOTE"]
   data = [ header ]
-  print('------------\n')
   for i in subscriptions:
     sub = [i.id, i.name, i.address, i.city, i.state, i.zip, i.email, i.phone, i.itemName, i.note]
     data.append(sub)

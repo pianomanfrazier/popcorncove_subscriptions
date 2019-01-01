@@ -2,7 +2,7 @@
 
 This app tracks customers' subscriptions boxes. The users can input new customers, search for existing customers, create a new subscription or modify an existing subscription. Finally the user can export all the subscription boxes going out that month to a spreadsheet and print out address shipping labels.
 
-# Development
+## Development
 
 Several environment variables are required for proper startup of the app. For the best database development experiece spin up a postgres database using:
 
@@ -38,7 +38,7 @@ cd client
 npm run dev
 ```
 
-# TODO
+## TODO
 
 - allow admin to delete customer
 - add loading status to all AJAX buttons

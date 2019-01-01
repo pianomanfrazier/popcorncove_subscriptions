@@ -2,6 +2,8 @@
 
 This app tracks customers' subscriptions boxes. The users can input new customers, search for existing customers, create a new subscription or modify an existing subscription. Finally the user can export all the subscription boxes going out that month to a spreadsheet and print out address shipping labels.
 
+# Development
+
 Several environment variables are required for proper startup of the app. For the best database development experiece spin up a postgres database using:
 
 ```bash
@@ -17,8 +19,24 @@ FLASK_APP="./server.py"
 DATABASE_URL="postgresql://postgres:supersecret@localhost/postgres"
 ```
 
+Then run the app
+
+```bash
+pip install virtualenv
+virtualenv -p python3 venv
+source ./venv/bin/activate
+pip install -r requirements.txt
+flask run
+```
+
 The app then uses basic http auth to authorize the user. Be sure to deploy this on https or the credentials are easy to grab from the header.
 
+To develop the client use the webpack dev server.
+
+```bash
+cd client
+npm run dev
+```
 
 # TODO
 

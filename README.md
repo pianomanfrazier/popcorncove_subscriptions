@@ -2,6 +2,14 @@
 
 This app tracks customers' subscriptions boxes. The users can input new customers, search for existing customers, create a new subscription or modify an existing subscription. Finally the user can export all the subscription boxes going out that month to a spreadsheet and print out address shipping labels.
 
+## Screenshots
+
+![Step 1](/docs/images/step1.png)
+![Step 2](/docs/images/step2.png)
+![Step 3](/docs/images/step3.png)
+![Manage Items](/docs/images/items.png)
+![Export Subscriptions](/docs/images/export.png)
+
 ## Development
 
 Several environment variables are required for proper startup of the app. For the best database development experiece spin up a postgres database using:

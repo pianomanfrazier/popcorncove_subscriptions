@@ -2,6 +2,8 @@
 
 This app tracks customers' subscriptions boxes. The users can input new customers, search for existing customers, create a new subscription or modify an existing subscription. Finally the user can export all the subscription boxes going out that month to a spreadsheet and print out address shipping labels.
 
+[YouTube video demo](https://youtu.be/P_8gmr_Ol-4)
+
 ## Screenshots
 
 ![Step 1](/docs/images/step1.png)
